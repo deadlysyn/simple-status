@@ -2,19 +2,20 @@ package main
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type event struct {
 	Timestamp string `json:"last_update,omitempty"`
-	// Service   string `json:"service,omitempty"`
-	Status string `json:"status,omitempty"`
+	Service   string `json:"service,omitempty"`
+	Status    string `json:"status,omitempty"`
 }
 
-// Events serves as our "status database" and
-// maps service names to events
+// Events serves as our "status database"
 var Events = make(map[string]event)
 
 // GET /events
@@ -36,16 +37,37 @@ func createEvent(c *gin.Context) {
 	service := c.PostForm("service")
 	status := c.PostForm("status")
 
-	if service != "" {
-		e := new(event)
-		e.Status = string(status)
-		t := time.Now().UTC()
-		e.Timestamp = t.String()
-		Events[service] = *e
+	if service == "" || status == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "must provide service and status",
+		})
+		return
 	}
+
+	for k := range Events {
+		if Events[k].Service == service {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "service exists, use update endpoint",
+			})
+			return
+		}
+	}
+
+	e := new(event)
+
+	id := strings.Replace(uuid.New().String(), "-", "", -1)
+
+	t := time.Now().UTC()
+	e.Timestamp = t.String()
+
+	e.Service = string(service)
+	e.Status = string(status)
+
+	Events[id] = *e
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "event created",
+		"id":      id,
 		"service": service,
 		"status":  status,
 	})
