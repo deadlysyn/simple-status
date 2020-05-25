@@ -27,9 +27,19 @@ func getEvents(c *gin.Context) {
 
 // GET /events/:id
 func getEvent(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "not implemented",
-	})
+	id := c.Param("id")
+
+	_, ok := Events[id]
+	if ok {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "event found",
+			"event":   Events[id],
+		})
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "event not found",
+		})
+	}
 }
 
 // POST /events
@@ -38,7 +48,7 @@ func createEvent(c *gin.Context) {
 	status := c.PostForm("status")
 
 	if service == "" || status == "" {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "must provide service and status",
 		})
 		return
@@ -46,7 +56,7 @@ func createEvent(c *gin.Context) {
 
 	for k := range Events {
 		if Events[k].Service == service {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "service exists, use update endpoint",
 			})
 			return
@@ -55,14 +65,13 @@ func createEvent(c *gin.Context) {
 
 	e := new(event)
 
-	id := strings.Replace(uuid.New().String(), "-", "", -1)
-
 	t := time.Now().UTC()
 	e.Timestamp = t.String()
 
 	e.Service = string(service)
 	e.Status = string(status)
 
+	id := strings.Replace(uuid.New().String(), "-", "", -1)
 	Events[id] = *e
 
 	c.JSON(http.StatusOK, gin.H{
