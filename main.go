@@ -1,8 +1,6 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,9 +18,8 @@ func main() {
 	router := gin.Default()
 
 	router.Static("/public", "./public")
-	router.LoadHTMLGlob("public/html/*.html")
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", nil)
+	router.NoRoute(func(c *gin.Context) {
+		c.File("./public/html/index.html")
 	})
 
 	router.GET("/events", GetEvents)
