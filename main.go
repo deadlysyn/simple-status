@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +18,12 @@ var Events = make(map[string]Event)
 
 func main() {
 	router := gin.Default()
+
+	router.Static("/public", "./public")
+	router.LoadHTMLGlob("public/html/*.html")
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
 
 	router.GET("/events", GetEvents)
 	router.GET("/events/:id", GetEvent)
