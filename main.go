@@ -9,14 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type event struct {
+type Event struct {
+	Service   string `json:"service,omitempty" binding:"required"`
+	Status    string `json:"status,omitempty" binding:"required"`
 	Timestamp string `json:"last_update,omitempty"`
-	Service   string `json:"service,omitempty"`
-	Status    string `json:"status,omitempty"`
 }
 
 // Events serves as our "status database"
-var Events = make(map[string]event)
+var Events = make(map[string]Event)
 
 // GET /events
 func getEvents(c *gin.Context) {
@@ -29,8 +29,7 @@ func getEvents(c *gin.Context) {
 func getEvent(c *gin.Context) {
 	id := c.Param("id")
 
-	_, ok := Events[id]
-	if ok {
+	if _, ok := Events[id]; ok {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "event found",
 			"event":   Events[id],
@@ -63,11 +62,8 @@ func createEvent(c *gin.Context) {
 		}
 	}
 
-	e := new(event)
-
-	t := time.Now().UTC()
-	e.Timestamp = t.String()
-
+	e := new(Event)
+	e.Timestamp = time.Now().UTC().String()
 	e.Service = string(service)
 	e.Status = string(status)
 
@@ -84,9 +80,30 @@ func createEvent(c *gin.Context) {
 
 // PUT /events/:id
 func updateEvent(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "not implemented",
-	})
+	id := c.Param("id")
+
+	if _, ok := Events[id]; ok {
+		e := new(Event)
+
+		if err := c.ShouldBindJSON(&e); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		e.Timestamp = time.Now().UTC().String()
+		Events[id] = *e
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "event updated",
+			"event":   Events[id],
+		})
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "event not found",
+		})
+	}
 }
 
 func main() {
