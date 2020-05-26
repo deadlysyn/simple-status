@@ -87,7 +87,7 @@ func updateEvent(c *gin.Context) {
 
 		if err := c.ShouldBindJSON(&e); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": err.Error(),
+				"message": "must provide service and status",
 			})
 			return
 		}
