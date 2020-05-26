@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Event describes a "status event"
 type Event struct {
 	Service   string `json:"service,omitempty" binding:"required"`
 	Status    string `json:"status,omitempty" binding:"required"`
@@ -20,8 +21,14 @@ var Events = make(map[string]Event)
 
 // GET /events
 func getEvents(c *gin.Context) {
+	var events []string
+
+	for k := range Events {
+		events = append(events, k)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"events": Events,
+		"events": events,
 	})
 }
 
@@ -43,10 +50,9 @@ func getEvent(c *gin.Context) {
 
 // POST /events
 func createEvent(c *gin.Context) {
-	service := c.PostForm("service")
-	status := c.PostForm("status")
+	e := new(Event)
 
-	if service == "" || status == "" {
+	if err := c.ShouldBindJSON(&e); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "must provide service and status",
 		})
@@ -54,7 +60,7 @@ func createEvent(c *gin.Context) {
 	}
 
 	for k := range Events {
-		if Events[k].Service == service {
+		if Events[k].Service == e.Service {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"message": "service exists, use update endpoint",
 			})
@@ -62,19 +68,15 @@ func createEvent(c *gin.Context) {
 		}
 	}
 
-	e := new(Event)
 	e.Timestamp = time.Now().UTC().String()
-	e.Service = string(service)
-	e.Status = string(status)
-
 	id := strings.Replace(uuid.New().String(), "-", "", -1)
 	Events[id] = *e
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "event created",
 		"id":      id,
-		"service": service,
-		"status":  status,
+		"service": e.Service,
+		"status":  e.Status,
 	})
 }
 
