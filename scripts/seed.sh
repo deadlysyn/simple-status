@@ -2,7 +2,7 @@
 
 set -eux -o pipefail
 
-HOST="localhost:8080"
+HOST="localhost:8080/api"
 
 # Empty database
 http ${HOST}/events

@@ -22,10 +22,13 @@ func main() {
 		c.File("./public/html/index.html")
 	})
 
-	router.GET("/events", GetEvents)
-	router.GET("/events/:id", GetEvent)
-	router.POST("/events", CreateEvent)
-	router.PUT("/events/:id", UpdateEvent)
+	api := router.Group("/api")
+	{
+		api.GET("/events", GetEvents)
+		api.GET("/events/:id", GetEvent)
+		api.POST("/events", CreateEvent)
+		api.PUT("/events/:id", UpdateEvent)
+	}
 
 	router.Run()
 }
