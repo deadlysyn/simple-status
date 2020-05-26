@@ -23,12 +23,10 @@ func main() {
 	})
 
 	api := router.Group("/api")
-	{
-		api.GET("/events", GetEvents)
-		api.GET("/events/:id", GetEvent)
-		api.POST("/events", CreateEvent)
-		api.PUT("/events/:id", UpdateEvent)
-	}
+	api.GET("/events", GetEvents)
+	api.GET("/events/:id", GetEvent)
+	api.POST("/events", CreateEvent)
+	api.PUT("/events/:id", UpdateEvent)
 
 	router.Run()
 }
