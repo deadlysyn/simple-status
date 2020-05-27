@@ -1,0 +1,24 @@
+{
+  "name": "simple-status",
+  "version": "0.0.1",
+  "description": "Dead Simple Status Page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deadlysyn/simple-status.git"
+  },
+  "keywords": [],
+  "author": "Mike Hoskins",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/deadlysyn/simple-status/issues"
+  },
+  "homepage": "https://github.com/deadlysyn/simple-status#readme",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-react-app": "^3.1.2"
+  }
+}
