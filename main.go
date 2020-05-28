@@ -4,14 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Event describes a "status event"
+// Event describes a status event
 type Event struct {
-	Service   string `json:"service,omitempty" binding:"required"`
-	Status    string `json:"status,omitempty" binding:"required"`
-	Timestamp string `json:"last_update,omitempty"`
+	Status      string `json:"status" binding:"required"`
+	Description string `json:"description" binding:"required"`
+	Updated     string `json:"updated,omitempty"`
 }
 
-// Events serves as our "status database"
+// Events maps service names to Events
 var Events = make(map[string]Event)
 
 func main() {
@@ -24,9 +24,9 @@ func main() {
 
 	api := router.Group("/api")
 	api.GET("/events", GetEvents)
-	api.GET("/events/:id", GetEvent)
+	api.GET("/events/:service", GetEvent)
 	api.POST("/events", CreateEvent)
-	api.PUT("/events/:id", UpdateEvent)
+	api.PUT("/events/:service", UpdateEvent)
 
 	router.Run()
 }
