@@ -1,104 +1,123 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
-// GetEvents provides list of event IDs
+// GetEvents provides list of all events
 // GET /events
 func GetEvents(c *gin.Context) {
-	var events []string
-
+	var l []Event
 	for k := range Events {
-		events = append(events, k)
+		l = append(l, Event{
+			Service:     k,
+			Status:      Events[k].Status,
+			Description: Events[k].Description,
+			Updated:     Events[k].Updated,
+		})
 	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"events": events,
+		"events": l,
 	})
 }
 
-// GetEvent GET /events/:id
+// GetEvent provides event detail for specified service
+// GET /events/:service
 func GetEvent(c *gin.Context) {
-	id := c.Param("id")
-
-	if _, ok := Events[id]; ok {
+	s := c.Param("service")
+	if _, ok := Events[s]; ok {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "event found",
-			"event":   Events[id],
+			"message": "service found",
+			s:         Events[s],
 		})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "event not found",
+			"message": "service not found",
 		})
 	}
 }
 
 // CreateEvent creates a new status event
+//
 // POST /events
-// {service: foo, status: bar}
+// {
+// service: name,
+// status: up|down|degraded|maintenance,
+// description: text
+// }
 func CreateEvent(c *gin.Context) {
-	e := new(Event)
-
+	var e Event
 	if err := c.ShouldBindJSON(&e); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "must provide service and status",
+			"message": "must provide service, status and description",
 		})
 		return
 	}
 
-	for k := range Events {
-		if Events[k].Service == e.Service {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "service exists, use update endpoint",
-			})
-			return
-		}
+	if _, ok := Events[e.Service]; ok {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "service exists, use PUT",
+		})
+		return
 	}
 
-	e.Timestamp = time.Now().UTC().String()
-	id := strings.Replace(uuid.New().String(), "-", "", -1)
-	Events[id] = *e
+	if !ValidStatus(e.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid status",
+		})
+		return
+	}
+
+	Events[e.Service] = EventData{
+		Status:      e.Status,
+		Description: e.Description,
+		Updated:     TimeString(),
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "event created",
-		"id":      id,
-		"service": e.Service,
-		"status":  e.Status,
+		"message": "service created",
+		e.Service: Events[e.Service],
 	})
 }
 
-// UpdateEvent updates an existing status event
-// PUT /events/:id
-// {service: foo, status: bar}
+// UpdateEvent updates an existing event
+// PUT /events/:service
+// {
+// status: up|down|degraded|maintenance,
+// description: text
+//}
 func UpdateEvent(c *gin.Context) {
-	id := c.Param("id")
-
-	if _, ok := Events[id]; ok {
-		e := new(Event)
-
+	s := c.Param("service")
+	if _, ok := Events[s]; ok {
+		var e EventData
 		if err := c.ShouldBindJSON(&e); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"message": "must provide service and status",
+				"message": "must provide status and description",
 			})
 			return
 		}
 
-		e.Timestamp = time.Now().UTC().String()
-		Events[id] = *e
+		if !ValidStatus(e.Status) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "invalid status",
+			})
+			return
+		}
+
+		e.Updated = TimeString()
+		Events[s] = e
 
 		c.JSON(http.StatusOK, gin.H{
-			"message": "event updated",
-			"event":   Events[id],
+			"message": "status updated",
+			s:         Events[s],
 		})
 	} else {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": "event not found",
+			"message": "service not found",
 		})
 	}
 }
