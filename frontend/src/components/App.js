@@ -1,7 +1,8 @@
 import React from "react";
-import "bulma/css/bulma.css";
-import "./App.css";
 import TwitterFeed from "./TwitterFeed";
+// import StatusSummary from "./StatusSummary";
+// import EventList from "./EventList";
+// import "./App.css";
 
 const App = () => {
   return (
