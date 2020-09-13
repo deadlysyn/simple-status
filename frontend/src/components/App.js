@@ -1,4 +1,5 @@
 import React from "react";
+import NavBar from "./NavBar";
 import EventList from "./EventList";
 import CentralStatus from "./CentralStatus";
 import TwitterFeed from "./TwitterFeed";
@@ -6,17 +7,16 @@ import TwitterFeed from "./TwitterFeed";
 
 const App = () => {
   return (
-    <div className="columns">
-      <div className="column is-two-thirds">
-        <section className="section">
+    <div className="content">
+      <NavBar />
+      <div className="columns">
+        <div className="column is-two-thirds">
           <CentralStatus />
           <EventList />
-        </section>
-      </div>
-      <div className="column">
-        <section className="section">
+        </div>
+        <div className="column">
           <TwitterFeed />
-        </section>
+        </div>
       </div>
     </div>
   );
