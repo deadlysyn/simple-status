@@ -59,18 +59,16 @@ const EventList = () => {
     }
 
     return (
-      <div className="content" key={service.id}>
-        <div className="box">
-          <span className={`icon ${statusColor}`}>
-            <i className={`fas ${statusIcon}`}></i>
-          </span>
-          <span className="subtitle">{service.name}</span>
-          <p>
-            Description: {service.description}
-            <br />
-            Last Updated: {events[service.id].updated}
-          </p>
-        </div>
+      <div className="box" key={service.id}>
+        <span className={`icon ${statusColor}`}>
+          <i className={`fas ${statusIcon}`}></i>
+        </span>
+        <span className="subtitle">{service.name}</span>
+        <p>
+          Description: {service.description}
+          <br />
+          Last Updated: {events[service.id].updated}
+        </p>
       </div>
     );
   });
