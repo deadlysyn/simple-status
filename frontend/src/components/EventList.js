@@ -19,41 +19,63 @@ const services = [
   },
 ];
 
-const events = [
-  {
-    service: 1,
+const events = {
+  1: {
     status: "OK",
     description: "All systems nominal.",
     updated: "2020-09-09",
   },
-  {
-    service: 2,
+  2: {
     status: "Degraded",
     description: "Maintenance in progress.",
     updated: "2020-09-09",
   },
-  {
-    service: 3,
-    status: "OK",
+  3: {
+    status: "Down",
     description: "All systems nominal.",
     updated: "2020-09-09",
   },
-];
+};
 
 const EventList = () => {
+  // api call to get "services" list mocked above
+  // api call to get latest event for each service ?
+
   const renderedList = services.map((service) => {
-    console.log(service);
+    let statusColor;
+    let statusIcon;
+    switch (events[service.id].status) {
+      case "Down":
+        statusColor = "has-text-danger";
+        statusIcon = "fa-times-circle";
+        break;
+      case "Degraded":
+        statusColor = "has-text-warning";
+        statusIcon = "fa-exclamation-circle";
+        break;
+      default:
+        statusColor = "has-text-success";
+        statusIcon = "fa-check-circle";
+    }
+
     return (
-      <div className="container is-fluid" key={service.id}>
-        <span className="icon has-text-success">
-          <i className="fas fa-check-square"></i>
-        </span>
-        <h1>{service.name}</h1>
+      <div className="content" key={service.id}>
+        <div className="box">
+          <span className={`icon ${statusColor}`}>
+            <i className={`fas ${statusIcon}`}></i>
+          </span>
+          <span className="subtitle">{service.name}</span>
+          <p>
+            Description: {service.description}
+            <br />
+            Last Updated: {events[service.id].updated}
+          </p>
+        </div>
       </div>
     );
   });
 
-  return <section className="section">{renderedList}</section>;
+  return <div className="container is-fluid">{renderedList}</div>;
 };
 
 export default EventList;
